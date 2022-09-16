@@ -1,5 +1,8 @@
+import type Koa from 'koa';
 import { ApolloServerPlugin } from '@apollo/server';
-import Koa from 'koa';
+import { compareSync } from 'bcryptjs';
+import { JwtPayload, verify } from 'jsonwebtoken';
+import { TOKEN_SECRET } from './config';
 import pubsub from './pubsub';
 
 export function ApolloServerDrainSocketServer({
@@ -26,3 +29,14 @@ export const getDynamicContext = async (ctx: Koa.Context) => {
   // throw the appropriate error
   return { user: null, pubsub: null };
 };
+
+export async function verifyToken(token: string): Promise<JwtPayload> {
+  return (await verify(token, TOKEN_SECRET as string)) as JwtPayload;
+}
+
+export async function verifyPassword(
+  userPassword: string,
+  dbPassword: string
+): Promise<boolean> {
+  return compareSync(userPassword, dbPassword);
+}

@@ -7,8 +7,9 @@ import { ApolloServer } from '@apollo/server';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import { WebSocketServer } from 'ws';
 import { useServer } from 'graphql-ws/lib/use/ws';
-import schema from './schema';
 import { getDynamicContext, ApolloServerDrainSocketServer } from './utils';
+import schema from './schema';
+import auth from './middleware/auth';
 
 interface Context {
   token?: string;
@@ -38,6 +39,7 @@ export async function startApolloServer() {
   await server.start();
   app.use(cors());
   app.use(bodyParser());
+  app.use(auth);
   app.use(
     koaMiddleware(server, {
       context: async ({ ctx }) => ({ token: ctx.headers.token }),
@@ -46,5 +48,5 @@ export async function startApolloServer() {
   await new Promise<void>((resolve) =>
     httpServer.listen({ port: 4000 }, resolve)
   );
-  console.log(`🚀 Server ready at http://localhost:4000`);
+  console.log(`🚀 Server ready at http://localhost:4000/graphql`);
 }
