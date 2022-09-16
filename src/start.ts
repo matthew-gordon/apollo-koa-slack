@@ -8,11 +8,13 @@ import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHt
 import { WebSocketServer } from 'ws';
 import { useServer } from 'graphql-ws/lib/use/ws';
 import { getDynamicContext, ApolloServerDrainSocketServer } from './utils';
-import schema from './schema';
+import { User } from './types';
 import auth from './middleware/auth';
+import pubsub from './pubsub';
+import schema from './schema';
 
-interface Context {
-  token?: string;
+export interface Context {
+  user?: Partial<User> | null;
 }
 
 export async function startApolloServer() {
@@ -42,7 +44,10 @@ export async function startApolloServer() {
   app.use(auth);
   app.use(
     koaMiddleware(server, {
-      context: async ({ ctx }) => ({ token: ctx.headers.token }),
+      context: async ({ ctx }) => ({
+        user: ctx.state.user || null,
+        pubsub,
+      }),
     })
   );
   await new Promise<void>((resolve) =>

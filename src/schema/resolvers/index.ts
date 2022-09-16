@@ -1,3 +1,4 @@
+import { Context } from '../../start';
 import pubsub from '../../pubsub';
 
 export const defaultResolvers = {
@@ -5,7 +6,10 @@ export const defaultResolvers = {
     hello: () => 'world',
   },
   Mutation: {
-    createPost: (_: void, { title, content }: any) => {
+    createPost: (
+      _: void,
+      { title, content }: { title: string; content: string }
+    ) => {
       pubsub.publish('POST_CREATED', {
         postCreated: {
           title,
