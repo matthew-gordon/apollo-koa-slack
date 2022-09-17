@@ -1,19 +1,33 @@
 const RootSchema = `#graphql
-  type Post {
-    title: String!
-    content: String!
+  scalar Date
+
+  input LoginUserInput {
+    email: String!
+    password: String!
+  }
+
+  type AuthResponse {
+    token: String!
+    user: User!
+  }
+
+  type User {
+    id: ID!
+    email: String!
+    username: String!
+    password: String
+    firstName: String!
+    lastName: String!
+    createdAt: Date!
+    updatedAt: Date!
+  } 
+
+  type Query {
+    me: User
   }
 
   type Mutation {
-    createPost(title: String!, content: String!): Post!
-  }
-  
-  type Query {
-    hello: String!
-  }
-
-  type Subscription {
-    postCreated: Post!
+    login(input: LoginUserInput!): AuthResponse!
   }
 `;
 

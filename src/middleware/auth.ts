@@ -1,5 +1,5 @@
 import type Koa from 'koa';
-import { getSingleUserById } from '../db/queries/user';
+import { getUserById } from '../db/queries/user';
 import { verifyToken } from '../utils';
 
 export default async (ctx: Koa.Context, next: Koa.Next) => {
@@ -8,11 +8,15 @@ export default async (ctx: Koa.Context, next: Koa.Next) => {
   if (!accessToken) {
     await next();
   } else {
-    const [type, token] = accessToken;
+    const [type, token] = (accessToken as string).split(' ');
+
+    if (type !== 'Bearer') {
+      await next();
+    }
 
     try {
       const data = await verifyToken(token);
-      const user = await getSingleUserById(data.sub!);
+      const user = await getUserById(data.sub!);
 
       if (!user) {
         await next();
@@ -23,4 +27,6 @@ export default async (ctx: Koa.Context, next: Koa.Next) => {
       await next();
     }
   }
+
+  await next();
 };

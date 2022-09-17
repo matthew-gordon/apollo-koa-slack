@@ -7,15 +7,10 @@ import { ApolloServer } from '@apollo/server';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import { WebSocketServer } from 'ws';
 import { useServer } from 'graphql-ws/lib/use/ws';
+import { Context } from './context';
 import { getDynamicContext, ApolloServerDrainSocketServer } from './utils';
-import { User } from './types';
 import auth from './middleware/auth';
-import pubsub from './pubsub';
 import schema from './schema';
-
-export interface Context {
-  user?: Partial<User> | null;
-}
 
 export async function startApolloServer() {
   const app = new Koa();
@@ -46,7 +41,6 @@ export async function startApolloServer() {
     koaMiddleware(server, {
       context: async ({ ctx }) => ({
         user: ctx.state.user || null,
-        pubsub,
       }),
     })
   );

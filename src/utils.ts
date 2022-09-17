@@ -1,10 +1,11 @@
 import type Koa from 'koa';
 import { ApolloServerPlugin } from '@apollo/server';
 import { compareSync } from 'bcryptjs';
-import { JwtPayload, verify } from 'jsonwebtoken';
+import { JwtPayload, verify, sign } from 'jsonwebtoken';
 import { TOKEN_SECRET } from './config';
 import pubsub from './pubsub';
-import { getSingleUserById } from './db/queries/user';
+import { User } from './types';
+import { getUserById } from './db/queries/user';
 
 export function ApolloServerDrainSocketServer({
   serverCleanup,
@@ -23,7 +24,7 @@ export function ApolloServerDrainSocketServer({
 export const getDynamicContext = async (ctx: Koa.Context) => {
   if (ctx.connectionParams.authorization) {
     const { sub } = await verifyToken(ctx.connectionParams.authorization);
-    const user = await getSingleUserById(sub!);
+    const user = await getUserById(sub!);
     return { pubsub, user };
   }
   // Let the resolvers know we don't have a current user so they can
@@ -40,4 +41,17 @@ export async function verifyPassword(
   dbPassword: string
 ): Promise<boolean> {
   return compareSync(userPassword, dbPassword);
+}
+
+export async function createToken(user: User): Promise<string> {
+  return sign(
+    {
+      sub: user.id,
+      email: user.email,
+      iss: 'apollo-koa-slack',
+      aud: 'apollo-koa-slack',
+    },
+    TOKEN_SECRET as string,
+    { algorithm: 'HS256', expiresIn: '1h' }
+  );
 }
