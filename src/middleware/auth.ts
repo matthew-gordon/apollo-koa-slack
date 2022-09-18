@@ -7,26 +7,23 @@ export default async (ctx: Koa.Context, next: Koa.Next) => {
 
   if (!accessToken) {
     await next();
-  } else {
-    const [type, token] = (accessToken as string).split(' ');
+  }
 
-    if (type !== 'Bearer') {
-      await next();
-    }
+  const [type, token] = (accessToken as string).split(' ');
 
+  if (type === 'Bearer' && !!token) {
     try {
       const data = await verifyToken(token);
       const user = await getUserById(data.sub!);
 
-      if (!user) {
-        await next();
-      }
+      if (!user) await next();
 
       ctx.state.user = Object.assign({}, user, { password: null });
-    } catch (err) {
+      await next();
+    } catch {
       await next();
     }
+  } else {
+    await next();
   }
-
-  await next();
 };
