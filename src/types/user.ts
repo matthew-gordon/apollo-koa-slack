@@ -8,3 +8,5 @@ export type User = {
   created_at: Date;
   updated_at: Date;
 };
+
+export type UserInput = Pick<User, 'email' | 'password'>;

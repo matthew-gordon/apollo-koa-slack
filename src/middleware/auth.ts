@@ -7,11 +7,12 @@ export default async (ctx: Koa.Context, next: Koa.Next) => {
 
   if (!accessToken) {
     await next();
-  }
+  } else if (
+    !!accessToken &&
+    (accessToken as string).split(' ')[0] === 'Bearer'
+  ) {
+    const [, token] = (accessToken as string).split(' ');
 
-  const [type, token] = (accessToken as string).split(' ');
-
-  if (type === 'Bearer' && !!token) {
     try {
       const data = await verifyToken(token);
       const user = await getUserById(data.sub!);

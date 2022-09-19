@@ -11,7 +11,7 @@ export const defaultResolvers = {
   Mutation: {
     async login(
       _: void,
-      { input }: { input: LoginUserInput }
+      { input }: { input: LoginUserInput },
     ): Promise<AuthResponse> {
       const { email, password } = input;
       if (!email || !password) {
