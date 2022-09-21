@@ -16,14 +16,32 @@ const RootSchema = `#graphql
     email: String!
     username: String!
     password: String
-    firstName: String!
-    lastName: String!
-    createdAt: Date!
-    updatedAt: Date!
+    first_name: String!
+    last_name: String!
+    workspaces: [Workspace!]!
+    created_at: Date!
+    updated_at: Date!
   } 
+
+  type Workspace {
+    id: ID!
+    name: String!
+    cname: String!
+    owner: User!
+    channels: [Channel!]!
+  }
+
+  type Channel {
+    id: ID!
+    name: String!
+    workspace: Workspace!
+    private: Boolean!
+    default: Boolean!
+  }
 
   type Query {
     me: User
+    getWorkspaceById(id: ID!): Workspace!
   }
 
   type Mutation {

@@ -1,11 +1,22 @@
 import { Context } from '../../context';
-import { getUserByEmail } from '../../db/queries/user';
+import {
+  getUserByEmail,
+  getUserById,
+  getUserWorkspacesById,
+} from '../../db/queries/user';
+import {
+  getWorkspaceById,
+  getWorkspaceChannelsById,
+} from '../../db/queries/workspace';
 import { AuthResponse, LoginUserInput, User } from '../../types';
 import { createToken, verifyPassword } from '../../utils';
 
 export const defaultResolvers = {
   Query: {
     me: (_: void, __: void, { user }: Context) => user,
+    getWorkspaceById: async (_: void, { id }: { id: string }) => {
+      return await getWorkspaceById(id);
+    },
   },
 
   Mutation: {
@@ -37,10 +48,24 @@ export const defaultResolvers = {
   },
 
   User: {
-    firstName: ({ first_name }: User) => first_name,
-    lastName: ({ last_name }: User) => last_name,
-    createdAt: ({ created_at }: User) => created_at,
-    updatedAt: ({ updated_at }: User) => updated_at,
+    workspaces: async ({ id }: { id: string }) => {
+      return await getUserWorkspacesById(id);
+    },
+  },
+
+  Workspace: {
+    owner: async ({ owner_id }: { owner_id: string }) => {
+      return await getUserById(owner_id);
+    },
+    channels: async ({ id }: { id: string }) => {
+      return await getWorkspaceChannelsById(id);
+    },
+  },
+
+  Channel: {
+    workspace: async ({ workspace_id }: { workspace_id: string }) => {
+      return await getWorkspaceById(workspace_id);
+    },
   },
 };
 
